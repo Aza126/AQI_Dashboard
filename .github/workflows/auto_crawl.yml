@@ -1,0 +1,46 @@
+name: Tu Dong Nap Du Lieu AQI
+
+# 1. Lên lịch chạy
+on:
+  schedule:
+    - cron: '0 * * * *' # Chạy vào phút thứ 0 của mỗi giờ
+  workflow_dispatch: # Bấm nút chạy bằng tay trên web để test
+
+permissions:
+  contents: write # BẮT BUỘC: Cấp quyền cho robot ghi đè file CSV lên kho chứa
+
+# 2. Các bước thực hiện
+jobs:
+  run-data-pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Tải mã nguồn về máy ảo
+        uses: actions/checkout@v4
+
+      - name: Cài đặt môi trường Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip' # Tăng tốc chạy bằng cách nhớ bộ đệm thư viện
+
+      - name: Cài đặt các thư viện cần thiết
+        run: pip install -r requirements.txt
+
+      - name: Chạy Kịch bản 1 (Kéo dữ liệu API)
+        run: python data_ingestion.py
+
+      - name: Chạy Kịch bản 2 (Làm sạch và Cộng dồn)
+        run: python data_preprocess.py
+
+      - name: Chạy Kịch bản 3 (Chờ Mô hình AI dự báo)
+        run: python inference.py
+
+      - name: Lưu và đẩy TẤT CẢ file CSV mới lên GitHub
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
+          git add raw_aqi_data.csv processed_aqi_data.csv
+          
+          # Chỉ commit và push NẾU có sự thay đổi trong file CSV
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Tự động cập nhật dữ liệu AQI 12 tỉnh" && git pull --rebase origin main && git push)

@@ -1,0 +1,1 @@
+print("Đang chờ Vai 2 và Vai 3 nạp Model AI. Tạm thời bỏ qua bước Dự báo!")
