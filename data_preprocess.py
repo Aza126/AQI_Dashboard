@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import StandardScaler
 
 def load_and_clean_data(filepath):
     print("1. Đang tải dữ liệu thô...")
@@ -54,10 +53,6 @@ def load_and_clean_data(filepath):
     df['hour'] = df['time'].dt.hour
     df['hour_sin'] = np.sin(2 * np.pi * df['hour'] / 23.0)
     df['hour_cos'] = np.cos(2 * np.pi * df['hour'] / 23.0)
-
-    # print("6. Đang chuẩn hóa các biến số môi trường...")
-    # scaler = StandardScaler()
-    # df[env_cols] = scaler.fit_transform(df[env_cols])
     
     return df
 
